@@ -1,5 +1,5 @@
 <?php
-
+// errors....
 include('config/db_connect.php');
 
 $pattern = '/^(0|[1-9]\d*)(\.\d{1,2})?$/';
@@ -85,6 +85,12 @@ if(isset($_POST['fsubmit'])){
 mysqli_free_result($result);
 mysqli_close($conn);
 ?>
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
    <?php include('templates/header.php'); ?>
