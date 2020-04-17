@@ -2,9 +2,9 @@
 
    <br>
    <label class="addingLabel">Size:</label>
-   <input type="text" name="dvdSize" value="<?php echo htmlspecialchars($parameter_1)?>">
+   <input type="text" name="dvdSize" value="<?php echo htmlspecialchars($_POST['dvdSize'] ?? '' )?>">
    <div class ='error' >
-    <?php echo $errors['parametr_1'] ?>
+      <?php echo $errors['dvdSize'] ?? '' ?>
    </div>
    <br>
 

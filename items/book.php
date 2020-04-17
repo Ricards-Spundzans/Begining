@@ -2,9 +2,9 @@
 
    <br>
    <label class="addingLabel">Weight:</label>
-   <input type="text" name="bookWeight" value="<?php echo htmlspecialchars($parameter_1)?>">
+   <input type="text" name="bookWeight" value="<?php echo htmlspecialchars($_POST['bookWeight'] ?? '' )?>">
    <div class ='error' >
-      <?php echo $errors['parametr_1'] ?>
+      <?php echo $errors['bookWeight'] ?? '' ?>
    </div>
    <br>
 
