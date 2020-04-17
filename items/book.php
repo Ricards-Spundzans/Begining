@@ -3,6 +3,7 @@
    <br>
    <label class="addingLabel">Weight:</label>
    <input type="text" name="bookWeight" value="<?php echo htmlspecialchars($_POST['bookWeight'] ?? '' )?>">
+   
    <div class ='error' >
       <?php echo $errors['bookWeight'] ?? '' ?>
    </div>

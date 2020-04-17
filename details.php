@@ -2,6 +2,46 @@
 
 include('config/db_connect.php');
 
+class productDisplay {
+   public $id;
+   public $sku;
+   public $name;
+   public $price;
+   public $type;
+   public $created_at;
+   public $parameterAll;
+
+   public function __construct($thing){
+      $this->id = $thing['id'];
+      $this->sku = $thing['sku'];
+      $this->name = $thing['name'];
+      $this->price = $thing['price'];
+      $this->created_at = $thing['created_at'];
+
+      switch ($thing['type']) {
+         case '1':
+            $this->type = 'CD';
+            $this->parameterAll = 'Size: ' . $thing['parameter_1'] . ' MB';
+         break;
+
+         case '2':
+            $this->type = 'Furniture';
+            $this->parameterAll = 'Dimension: ' . $thing['parameter_1'] . ' x ' . $thing['parameter_2'] . ' x ' . $thing['parameter_3'] . 'mm';
+         break;
+
+         case '3':
+            $this->type = 'Book';
+            $this->parameterAll = 'Weight: ' . $thing['parameter_1'] . ' g';
+         break;
+
+         default:
+            echo 'error';
+         break;
+      }
+   }
+
+}
+
 if (isset($_POST['delete'])) {
 
    $id_to_delete = mysqli_real_escape_string($conn, $_POST['id_to_delete']);
@@ -14,6 +54,7 @@ if (isset($_POST['delete'])) {
    }
 }
 
+
 if (isset($_GET['id'])) {
    $id = mysqli_real_escape_string($conn, $_GET['id']);
    //make sql
@@ -22,6 +63,8 @@ if (isset($_GET['id'])) {
    $result = mysqli_query($conn, $sql);
    //result to array
    $thing = mysqli_fetch_assoc($result);
+
+   $selectedProduct = new productDisplay($thing);
    //closing
    mysqli_free_result($result);
    mysqli_close($conn);
@@ -43,35 +86,22 @@ if (isset($_GET['id'])) {
    <div class="detailsAll">
       <?php if($thing): ?>
 
-         <h3>Id: <?php echo htmlspecialchars($thing['id']) ?></h3>
-         <p>SKU: <?php echo htmlspecialchars($thing['sku']) ?></p>
-         <p>Name: <?php echo htmlspecialchars($thing['name']) ?></p>
-         <p>Price: <?php echo htmlspecialchars($thing['price'])." $" ?></p>
-
-         <p>Type: <?php if($thing['type'] == 1){ echo "CD";}
-            elseif($thing['type'] == 2) { echo "Furniture";  }
-            elseif($thing['type'] == 3) { echo "Book";  }
-            else{echo "ERROR - no type";} ?>
-         </p>
-
-         <?php if($thing['type'] == 1): ?>
-            <p>Size: <?php echo htmlspecialchars($thing['parameter_1']). ' MB' ?></p>
-         <?php elseif($thing['type'] == 2): ?>
-            <p>Dimension:  <?php echo htmlspecialchars($thing['parameter_1'] . ' x ' . $thing['parameter_2']. ' x ' . $thing['parameter_3'] . ' mm'  )  ?></p>
-         <?php elseif($thing['type'] == 3): ?>
-            <p>Weight:  <?php echo htmlspecialchars($thing['parameter_1']). ' g'   ?></p>
-         <?php endif; ?>
-
-         <p>Created at: <?php echo date($thing['created_at']) ?></p>
+         <h3>Id: <?php echo htmlspecialchars($selectedProduct->id) ?></h3>
+         <p>SKU: <?php echo htmlspecialchars($selectedProduct->sku) ?></p>
+         <p>Name: <?php echo htmlspecialchars($selectedProduct->name) ?></p>
+         <p>Price: <?php echo htmlspecialchars($selectedProduct->price)." $" ?></p>
+         <p>Type: <?php echo htmlspecialchars($selectedProduct->type) ?></p>
+         <p><?php echo htmlspecialchars($selectedProduct->parameterAll) ?></p>
+         <p>Created at: <?php echo date($selectedProduct->created_at) ?></p>
 
          <!-- delete -->
          <div class="deleteDetail">
            <form class="" action="details.php" method="POST">
-              <input type="hidden" name="id_to_delete" value="<?php echo $thing['id'] ?>">
+              <input type="hidden" name="id_to_delete" value="<?php echo "$selectedProduct->id" ?>">
               <input type="submit" name="delete" value="Delete" class = "btn">
            </form>
          </div>
-
+         <br>
 
       <?php else: ?>
          <h5>There is nothing with this ID...</h5>

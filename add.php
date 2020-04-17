@@ -10,8 +10,6 @@ $result = mysqli_query($conn, $sql);
 $things = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 
-
-
 class Product{
    public $data;
    public $error2 = [];
@@ -52,7 +50,15 @@ class Product{
 
       if(empty($temp)){
          $this->checkError('sku', 'Sku is empty');
+      }else {
+         global $things;
+         foreach ($things as $thing) {
+            if($thing['sku'] == $temp){
+               $this->checkError('sku', 'SKU is already taken');
+            }
+         }
       }
+
    }
 
    public function checkName(){
@@ -77,30 +83,18 @@ class Product{
             $this->checkError('price', 'Wrong price format. Use integers and only 2 digits after "." <br/> (Please use "." between dollars and cents.)');
          }else {
             $this->data['price'] = number_format($temp, 2, '.', '');
+            $_POST['price'] = $this->data['price'];
          }
       }
-   }
-
-   public function compareSku($tempSku){
-      global $things;
-         foreach ($things as $thing) {
-            if($thing['sku'] == $tempSku){
-               $this->checkError('sku', 'SKU is already taken');
-            }
-         }
-
    }
 
    public function checkError($key, $reason){
       $this->error2[$key] = $reason;
    }
-
 }
-
    class Dvd extends Product{
 
       public function __construct($post_data){
-
          parent::__construct($post_data);
 
          $temp = trim($this->data['dvdSize']);
@@ -110,7 +104,8 @@ class Product{
             if(preg_match($this->pattern2,$temp) == '0'){
                $this->checkError('dvdSize', 'Wrong input of size' );
             }else {
-               $this->data['dvdSize'] = $temp;
+               global $parameter_1;
+               $parameter_1 = $temp;
             }
          }
 
@@ -118,8 +113,6 @@ class Product{
          if(preg_match('/CDC/',$tempSku) == '0' ){
             $this->checkError('sku', 'SKU doesnt contain CDC');
          }
-
-         $this->compareSku($tempSku);
       }
    }
 
@@ -137,7 +130,8 @@ class Product{
             if(preg_match($this->pattern2,$temp1) == '0'){
                $this->checkError('parametr_1', 'Wrong input of parametr 1' );
             }else {
-               $this->data['parametr_1'] = $temp1;
+               global $parameter_1;
+               $parameter_1  = $temp1;
             }
          }
          if(empty($temp2)){
@@ -146,7 +140,8 @@ class Product{
             if(preg_match($this->pattern2,$temp2) == '0'){
                $this->checkError('parametr_2', 'Wrong input of parametr 2' );
             }else {
-               $this->data['parametr_2'] = $temp2;
+               global $parameter_2;
+               $parameter_2 = $temp2;
             }
          }
 
@@ -156,17 +151,15 @@ class Product{
             if(preg_match($this->pattern2,$temp3) == '0'){
                $this->checkError('parametr_3', 'Wrong input of parametr 3' );
             }else {
-               $this->data['parametr_3'] = $temp3;
+               global $parameter_3;
+               $parameter_3 = $temp3;
             }
          }
-
          $tempSku = trim($this->data['sku']);
          if(preg_match('/FNF/',$tempSku) == '0' ){
             $this->checkError('sku', 'SKU doesnt contain FNF');
          }
-         $this->compareSku($tempSku);
       }
-
    }
 
    class Book extends Product{
@@ -181,63 +174,50 @@ class Product{
             if(preg_match($this->pattern2,$temp) == '0'){
                $this->checkError('bookWeight', 'Wrong input of weight' );
             }else {
-               $this->data['bookWeight'] = $temp;
+               global $parameter_1;
+               $parameter_1 = $temp;
             }
          }
          $tempSku = trim($this->data['sku']);
          if(preg_match('/BOB/',$tempSku) == '0' ){
             $this->checkError('sku', 'SKU doesnt contain BOB');
          }
-         $this->compareSku($tempSku);
       }
    }
-
-
-
 
 if(isset($_POST['fsubmit'])){
 $selctedFormat =( $_POST['selectProduct'] ?? '' );
 
    switch ($selctedFormat) {
       case '1':
-         $testing = new Dvd($_POST);
-         $parameter_1 = $testing->data['dvdSize'];
+         $mainObject = new Dvd($_POST);
       break;
 
       case '2':
-         $testing = new Furniture($_POST);
-         $parameter_1 = $testing->data['parametr_1'];
-         $parameter_2 = $testing->data['parametr_2'];
-         $parameter_3 = $testing->data['parametr_3'];
+         $mainObject = new Furniture($_POST);
       break;
 
       case '3':
-         $testing = new Book($_POST);
-         $parameter_1 = $testing->data['bookWeight'];
+         $mainObject = new Book($_POST);
       break;
 
       default:
-         $testing = new Product($_POST);
+         $mainObject = new Product($_POST);
       break;
    }
-   $errors = $testing->checkInput();
-
-
+   $errors = $mainObject->checkInput();
 
    if(array_filter($errors)){
 
    }else{
 
-
-      $sku = mysqli_real_escape_string($conn, $testing->data['sku']);
-      $name = mysqli_real_escape_string($conn, $testing->data['name']);
-      $price = mysqli_real_escape_string($conn, $testing->data['price']);
+      $sku = mysqli_real_escape_string($conn, $mainObject->data['sku']);
+      $name = mysqli_real_escape_string($conn, $mainObject->data['name']);
+      $price = mysqli_real_escape_string($conn, $mainObject->data['price']);
       $type = mysqli_real_escape_string($conn, $selctedFormat);
       $parameter_1 = mysqli_real_escape_string($conn, $parameter_1);
       $parameter_2 = mysqli_real_escape_string($conn, $parameter_2);
       $parameter_3 = mysqli_real_escape_string($conn, $parameter_3);
-
-
 
       $sql = "INSERT INTO things(sku, name, price, type, parameter_1, parameter_2, parameter_3) VALUES('$sku', '$name', '$price', '$type', '$parameter_1', '$parameter_2', '$parameter_3' )";
       if(mysqli_query($conn, $sql)){

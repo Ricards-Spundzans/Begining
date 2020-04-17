@@ -2,23 +2,60 @@
 
 include('config/db_connect.php');
 
-$selectedOption = '';
+$error = $selectedOption = '';
 $orderBy = 'created_at';
 
 $sql = "SELECT * FROM things ORDER BY $orderBy";
 $result = mysqli_query($conn, $sql);
 $things = mysqli_fetch_all($result, MYSQLI_ASSOC);
-$error ='';
+
+
+class productDisplay {
+   public $id;
+   public $sku;
+   public $name;
+   public $price;
+   public $type;
+
+   public $parameterAll;
+
+   public function __construct($thing){
+      $this->id = $thing['id'];
+      $this->sku = $thing['sku'];
+      $this->name = $thing['name'];
+      $this->price = $thing['price'];
+
+      switch ($thing['type']) {
+         case '1':
+            $this->parameterAll = $thing['parameter_1'] . ' MB';
+         break;
+
+         case '2':
+            $this->parameterAll =  $thing['parameter_1'] . ' x ' . $thing['parameter_2'] . ' x ' . $thing['parameter_3'] . 'mm';
+         break;
+
+         case '3':
+            $this->parameterAll =  $thing['parameter_1'] . ' g';
+         break;
+
+         default:
+            echo 'error';
+         break;
+      }
+   }
+
+}
+
 
 if(isset($_POST['apply'])){
-  if(empty($_POST['optionSelect'])){   //if there is selected options
+  if(empty($_POST['optionSelect'])){
       $error = 'Please choose option <br />';
   }else {
       $selectedOption = $_POST['optionSelect'];
       switch ($selectedOption) {
 
       case 'massDelete':
-         if(!empty($_POST['chose'])){ //if there is any selected checkbox
+         if(!empty($_POST['chose'])){
             foreach ($_POST['chose'] as $chosen) {
                $id_to_delete = mysqli_real_escape_string($conn, $chosen);
                $sql = "DELETE FROM things WHERE id = $id_to_delete";
@@ -76,14 +113,15 @@ mysqli_close($conn);
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
    <?php include('templates/header.php'); ?>
 
 <div class="nname">
       <h1 >Product list</h1>
 </div>
 
-
 <form class="" method="post">
+
    <div class="deleteb">
       <select class="optionSelect" name="optionSelect" id="optionSelect">
          <option value="" selected disabled>Sort/Delete</option>
@@ -103,29 +141,24 @@ mysqli_close($conn);
 
       <div class='wrap' >
          <?php foreach ($things as $thing): ?>
+            <?php $onedProduct = new productDisplay($thing)?>
             <div>
 
                <div class = 'checkboxb'>
-                  <input type="checkbox" name="chose[]" value="<?php echo htmlspecialchars($thing['id']) ?>">
+                  <input type="checkbox" name="chose[]" value="<?php echo htmlspecialchars($onedProduct->id)?>">
                </div>
 
                <div class="infoC">
 
-                  <li><?php echo htmlspecialchars($thing['sku'])?></li>
-                  <li><?php echo htmlspecialchars($thing['name'])?></li>
-                  <li><?php echo htmlspecialchars($thing['price'])." $" ?></li>
+                  <li><?php echo htmlspecialchars($onedProduct->sku) ?></li>
+                  <li><?php echo htmlspecialchars($onedProduct->name) ?></li>
+                  <li><?php echo htmlspecialchars($onedProduct->price)." $" ?></li>
+                  <li><?php echo htmlspecialchars($onedProduct->parameterAll) ?></li>
 
-                  <?php if($thing['type'] == 1): ?>
-                     <li><?php echo htmlspecialchars($thing['parameter_1']). ' MB' ?></li>
-                  <?php elseif($thing['type'] == 2): ?>
-                     <li><?php echo htmlspecialchars($thing['parameter_1'] . ' x ' . $thing['parameter_2']. ' x ' . $thing['parameter_3'] . ' mm'  )  ?></li>
-                  <?php elseif($thing['type'] == 3): ?>
-                     <li><?php echo htmlspecialchars($thing['parameter_1']). ' g'   ?></li>
-                  <?php endif; ?>
                </div>
 
                <div class ='detailb' >
-                  <a href="details.php?id=<?php echo $thing['id'] ?>">more info</a>
+                  <a href="details.php?id=<?php echo htmlspecialchars($onedProduct->id) ?>">more info</a>
                </div>
 
             </div>
