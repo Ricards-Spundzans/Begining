@@ -1,5 +1,7 @@
 <?php
 
+// connecting to database - common for every php file that needs connection
+
 $conn = mysqli_connect('localhost','ricards', 'task123', 'catalogue_task_1');
 
    if(!$conn){
