@@ -4,53 +4,10 @@
 include('config/db_connect.php');
 
 // getting data from the database - converting to the variable
+
 $error = $selectedOption = '';
-$orderBy = 'created_at';
-$sql = "SELECT * FROM things ORDER BY $orderBy";
-$result = mysqli_query($conn, $sql);
-$things = mysqli_fetch_all($result, MYSQLI_ASSOC);
+include('templates/common_class_show.php');
 
-
-// common class for every product
-class productDisplay {
-   public $id;
-   public $sku;
-   public $name;
-   public $price;
-   public $type;
-   public $parameterAll;
-
-   public function __construct($thing){
-
-// common properties of products
-      $this->id = $thing['id'];
-      $this->sku = $thing['sku'];
-      $this->name = $thing['name'];
-      $this->price = $thing['price'];
-
-// type switch - writing down parameters and the right units of measurement for each product that
-      switch ($thing['type']) {
-         case '1':
-// MB for DVD
-            $this->parameterAll = $thing['parameter_1'] . ' MB';
-         break;
-
-         case '2':
-// mm for Furniture
-            $this->parameterAll =  $thing['parameter_1'] . ' x ' . $thing['parameter_2'] . ' x ' . $thing['parameter_3'] . 'mm';
-         break;
-
-         case '3':
-// g for Books
-            $this->parameterAll =  $thing['parameter_1'] . ' g';
-         break;
-
-         default:
-            echo 'error';
-         break;
-      }
-   }
-}
 
 // if button "apply" is pressed
 if(isset($_POST['apply'])){
@@ -135,24 +92,25 @@ mysqli_close($conn);
       <div class='wrap' >
          <?php foreach ($things as $thing): ?>
 <!-- each product in database is separated as individual product             -->
-            <?php $onedProduct = new productDisplay($thing)?>
+            <?php $oneProduct = new productDisplay($thing)?>
+            <?php setProperties($oneProduct,$thing) ?>
             <div>
 
                <div class = 'checkboxb'>
-                  <input class = "checkbox__input" id="checkbox__input" onclick="isChecked(this)" type="checkbox" name="chose[]" value="<?php echo htmlspecialchars($onedProduct->id)?>">
+                  <input class = "checkbox__input" id="checkbox__input" onclick="isChecked(this)" type="checkbox" name="chose[]" value="<?php echo htmlspecialchars($oneProduct->getId())?>">
                </div>
 
                <div class="infoC">
  <!-- information about one thing -->
-                  <li><?php echo htmlspecialchars($onedProduct->sku) ?></li>
-                  <li><?php echo htmlspecialchars($onedProduct->name) ?></li>
-                  <li><?php echo htmlspecialchars($onedProduct->price)." $" ?></li>
-                  <li><?php echo htmlspecialchars($onedProduct->parameterAll) ?></li>
+                  <li><?php echo htmlspecialchars($oneProduct->getSku()) ?></li>
+                  <li><?php echo htmlspecialchars($oneProduct->getName()) ?></li>
+                  <li><?php echo htmlspecialchars($oneProduct->getPrice())." $" ?></li>
+                  <li><?php echo htmlspecialchars($oneProduct->getParameter()) ?></li>
 
                </div>
  <!-- link to the detail page -->
                <div class ='detailb' >
-                  <a href="details.php?id=<?php echo htmlspecialchars($onedProduct->id) ?>">more info</a>
+                  <a href="details.php?id=<?php echo htmlspecialchars($oneProduct->getId()) ?>">more info</a>
                </div>
 
             </div>

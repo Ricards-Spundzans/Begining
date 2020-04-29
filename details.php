@@ -3,48 +3,8 @@
 // connecting to the database
 include('config/db_connect.php');
 
-// class for every product
-class productDisplay {
-   public $id;
-   public $sku;
-   public $name;
-   public $price;
-   public $type;
-   public $created_at;
-   public $parameterAll;
-
-   public function __construct($thing){
-// common properties of products
-      $this->id = $thing['id'];
-      $this->sku = $thing['sku'];
-      $this->name = $thing['name'];
-      $this->price = $thing['price'];
-      $this->created_at = $thing['created_at'];
-
-// individual properties (size. weight, dimension) - switched by type
-      switch ($thing['type']) {
-         case '1':
-            $this->type = 'CD';
-            $this->parameterAll = 'Size: ' . $thing['parameter_1'] . ' MB';
-         break;
-
-         case '2':
-            $this->type = 'Furniture';
-            $this->parameterAll = 'Dimension: ' . $thing['parameter_1'] . ' x ' . $thing['parameter_2'] . ' x ' . $thing['parameter_3'] . 'mm';
-         break;
-
-         case '3':
-            $this->type = 'Book';
-            $this->parameterAll = 'Weight: ' . $thing['parameter_1'] . ' g';
-         break;
-
-         default:
-            echo 'error';
-         break;
-      }
-   }
-
-}
+// common class to show products
+include('templates/common_class_show.php');
 
 // individual delete option
 if (isset($_POST['delete'])) {
@@ -57,7 +17,6 @@ if (isset($_POST['delete'])) {
    }
 }
 
-
 // showing only one, selected product from the catalogue
 if (isset($_GET['id'])) {
    $id = mysqli_real_escape_string($conn, $_GET['id']);
@@ -68,7 +27,10 @@ if (isset($_GET['id'])) {
 //result to the array
    $thing = mysqli_fetch_assoc($result);
 
-   $selectedProduct = new productDisplay($thing);
+   if($thing){
+      $selectedProduct = new productDisplay($thing);
+   }
+
 //closing the sql
    mysqli_free_result($result);
    mysqli_close($conn);
@@ -89,27 +51,27 @@ if (isset($_GET['id'])) {
 
    <div class="detailsAll">
       <?php if($thing): ?>
-
+         <?php setProperties($selectedProduct,$thing) ?>
 <!-- details shown to user -->
-         <h3>Id: <?php echo htmlspecialchars($selectedProduct->id) ?></h3>
-         <p>SKU: <?php echo htmlspecialchars($selectedProduct->sku) ?></p>
-         <p>Name: <?php echo htmlspecialchars($selectedProduct->name) ?></p>
-         <p>Price: <?php echo htmlspecialchars($selectedProduct->price)." $" ?></p>
-         <p>Type: <?php echo htmlspecialchars($selectedProduct->type) ?></p>
-         <p><?php echo htmlspecialchars($selectedProduct->parameterAll) ?></p>
-         <p>Created at: <?php echo date($selectedProduct->created_at) ?></p>
+         <h3>Id: <?php echo htmlspecialchars($selectedProduct->getId()) ?></h3>
+         <p>SKU: <?php echo htmlspecialchars($selectedProduct->getSku()) ?></p>
+         <p>Name: <?php echo htmlspecialchars($selectedProduct->getName()) ?></p>
+         <p>Price: <?php echo htmlspecialchars($selectedProduct->getPrice())." $" ?></p>
+         <p>Type: <?php echo htmlspecialchars($selectedProduct->getTypeName()) ?></p>
+         <p><?php echo htmlspecialchars($selectedProduct->getDimension().": ". $selectedProduct->getParameter()) ?></p>
+         <p>Created at: <?php echo date($selectedProduct->getCreatedAt()) ?></p>
 
 <!-- delete option for one product -->
          <div class="deleteDetail">
            <form class="" action="details.php" method="POST">
-              <input type="hidden" name="id_to_delete" value="<?php echo "$selectedProduct->id" ?>">
+              <input type="hidden" name="id_to_delete" value="<?php echo $selectedProduct->getId() ?>">
               <input type="submit" name="delete" value="Delete" class = "btn">
            </form>
          </div>
          <br>
 
       <?php else: ?>
-<!-- case if wrong ID   -->
+<!-- case if wrong ID input   -->
          <h5>There is nothing with this ID...</h5>
       <?php endif; ?>
 

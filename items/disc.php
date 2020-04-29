@@ -7,7 +7,7 @@
 <!-- input for CD only parameter -->
    <br>
    <label class="addingLabel">Size:</label>
-   <input type="text" name="dvdSize" value="<?php echo htmlspecialchars($_POST['dvdSize'] ?? '' )?>">
+   <input type="text" name="parameter[]" value="<?php echo htmlspecialchars($_POST['parameter'][0] ?? '' )?>">
 
    <div class ='error' >
       <?php echo $errors['dvdSize'] ?? '' ?>
@@ -17,9 +17,9 @@
 <!-- short help for user with details about input -->
    <div class="chooseHelp">
       <li>Please provide size of DVD-disc in "MB".</li>
-      <li>Size should be written in integer form.</li>
-      <li>In case you want to generate right format of SKU, press label "SKU" in the first row.</li>
-      <li>Press label "Price" to generate right format of price.</li>
+      <li>Size <?php echo $dimensionForm ?></li>
+      <li><?php echo $skuForm ?></li>
+      <li><?php echo $priceForm ?></li>
       <li>(SKU must contain "CDC" in order to get saved as DVD) </li>
    </div>
 
